@@ -23,6 +23,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     private static final String REACT_CLASS = "RCTVideo";
 
+    private static final String PROP_AUDIO_OUTPUT_PORT = "audioOutputPort";
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
@@ -98,6 +99,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
                 "ScaleToFill", Integer.toString(ResizeMode.RESIZE_MODE_FILL),
                 "ScaleAspectFill", Integer.toString(ResizeMode.RESIZE_MODE_CENTER_CROP)
         );
+    }
+
+    @ReactProp(name = PROP_AUDIO_OUTPUT_PORT)
+    public void setAudioOutputPort(final ReactExoplayerView videoView, final String audioOutputPort) {
+        videoView.setAudioOutputPortModifier(audioOutputPort);
     }
 
     @ReactProp(name = PROP_SRC)

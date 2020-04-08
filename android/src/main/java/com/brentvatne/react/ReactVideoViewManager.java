@@ -18,6 +18,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
 
     public static final String REACT_CLASS = "RCTVideo";
 
+    public static final String PROP_AUDIO_OUTPUT_PORT = "audioOutputPort";
     public static final String PROP_SRC = "src";
     public static final String PROP_SRC_URI = "uri";
     public static final String PROP_SRC_TYPE = "type";
@@ -74,6 +75,11 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
                 "ScaleAspectFit", Integer.toString(ScalableType.FIT_CENTER.ordinal()),
                 "ScaleAspectFill", Integer.toString(ScalableType.CENTER_CROP.ordinal())
         );
+    }
+
+    @ReactProp(name = PROP_AUDIO_OUTPUT_PORT)
+    public void setAudioOutputPort(final ReactVideoView videoView, final String audioOutputPort) {
+        videoView.setAudioOutputPortModifier(audioOutputPort);
     }
 
     @ReactProp(name = PROP_SRC)

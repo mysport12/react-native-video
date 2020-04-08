@@ -5,6 +5,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.TimedMetaData;
 import android.net.Uri;
@@ -114,6 +116,7 @@ public class ReactVideoView extends ScalableVideoView implements
     private Handler videoControlHandler = new Handler();
     private MediaController mediaController;
 
+    private String mAudioOutputPort = "speaker";
     private String mSrcUriString = null;
     private String mSrcType = "mp4";
     private ReadableMap mRequestHeaders = null;
@@ -369,6 +372,34 @@ public class ReactVideoView extends ScalableVideoView implements
         }
     }
 
+    public void setAudioOutputPortModifier(final String audioOutputPort) {
+        mAudioOutputPort = audioOutputPort;
+
+        if (!mMediaPlayerValid) {
+            return;
+        }
+        try {
+            if (audioOutputPort == "earpiece") {
+                if (Build.VERSION.SDK_INT < 21) {
+                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
+                } else {
+                    mMediaPlayer.setAudioAttributes(
+                            new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
+                }
+            } else {
+                if (Build.VERSION.SDK_INT < 21) {
+                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                } else {
+                    mMediaPlayer.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void setResizeModeModifier(final ScalableType resizeMode) {
         mResizeMode = resizeMode;
 
@@ -513,6 +544,7 @@ public class ReactVideoView extends ScalableVideoView implements
     }
 
     public void applyModifiers() {
+        setAudioOutputPortModifier(mAudioOutputPort);
         setResizeModeModifier(mResizeMode);
         setRepeatModifier(mRepeat);
         setPausedModifier(mPaused);

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -127,6 +128,7 @@ class ReactExoplayerView extends FrameLayout implements
     private int bufferForPlaybackAfterRebufferMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
     // Props from React
+    private String audioOutputPort = "speaker";
     private Uri srcUri;
     private String extension;
     private boolean repeat;
@@ -1011,11 +1013,38 @@ class ReactExoplayerView extends FrameLayout implements
         initializePlayer();
     }
 
+    public void setAudioOutputPortModifier(String audioOutputPort) {
+        this.audioOutputPort = audioOutputPort;
+        if (player != null) {
+            try {
+                if (audioOutputPort == "earpiece") {
+                    if (Build.VERSION.SDK_INT < 21) {
+                        player.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
+                    } else {
+                        player.setAudioAttributes(
+                                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
+                    }
+                } else {
+                    if (Build.VERSION.SDK_INT < 21) {
+                        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    } else {
+                        player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+                    }
+                }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
     public void setResizeModeModifier(@ResizeMode.Mode int resizeMode) {
         exoPlayerView.setResizeMode(resizeMode);
     }
 
     private void applyModifiers() {
+        setAudioOutputPortModifier(audioOutputPort);
         setRepeatModifier(repeat);
         setMutedModifier(muted);
     }

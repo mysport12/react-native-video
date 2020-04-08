@@ -54,6 +54,7 @@ static int const RCTVideoUnset = -1;
   float _rate;
   float _maxBitRate;
 
+  NSString * _audioOutputPort;
   BOOL _automaticallyWaitsToMinimizeStalling;
   BOOL _muted;
   BOOL _paused;
@@ -87,8 +88,9 @@ static int const RCTVideoUnset = -1;
 - (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher
 {
   if ((self = [super init])) {
+    _audioOutputPort = @"speaker";
     _eventDispatcher = eventDispatcher;
-	  _automaticallyWaitsToMinimizeStalling = YES;
+     _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -784,6 +786,16 @@ static int const RCTVideoUnset = -1;
 
 #pragma mark - Prop setters
 
+- (void)setAudioOutputPort:(NSString*)audioOutputPort
+{
+    if([audioOutputPort isEqualToString:@"speaker"]) {
+        [[AVAudioSession sharedInstance] overrideOutputAudioPort:(AVAudioSessionPortOverrideSpeaker) error:nil];
+    } else if([audioOutputPort isEqualToString:@"earpiece"]) {
+        [[AVAudioSession sharedInstance] overrideOutputAudioPort:(AVAudioSessionPortOverrideNone) error:nil];
+    }
+    _audioOutputPort = audioOutputPort;
+}
+
 - (void)setResizeMode:(NSString*)mode
 {
   if( _controls )
@@ -864,7 +876,7 @@ static int const RCTVideoUnset = -1;
     [_player setRate:0.0];
   } else {
     if([_ignoreSilentSwitch isEqualToString:@"ignore"]) {
-      [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+      [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
     } else if([_ignoreSilentSwitch isEqualToString:@"obey"]) {
       [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
     }
